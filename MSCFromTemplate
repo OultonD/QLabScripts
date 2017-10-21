@@ -1,0 +1,65 @@
+# Based on a script from https://qlabcookbook.com
+# Paste into a new Script Cue
+# This Script when run makes a copy of a MIDI Show Control Cue which must be named "MSCT"
+# It copies all the values, except for the cue number, which increments each time
+
+
+set thecommandnamelist to {"GO", "STOP", "RESUME", "TIMED_GO", "LOAD", "SET", "FIRE", "ALL_OFF", "RESTORE", "RESET", "GO_OFF"}
+display dialog "Number of cues to generate:" default answer "100"
+if button returned of result = "cancel" then
+	return
+else
+	set therepeat to (text returned of result) as integer
+end if
+display dialog "Increment?" default answer "1"
+if button returned of result = "cancel" then
+	return
+else
+	set theincrement to (text returned of result) as real
+end if
+display dialog "Integer value format" buttons {"1", "1.0"} default button "1"
+set integertype to button returned of result
+display dialog "Device Name for Q Name Text:" default answer ""
+if button returned of result = "cancel" then
+	return
+else
+	set thedevicename to (text returned of result) as string
+end if
+
+tell front workspace
+	set theindex to q_number of cue "MSCT" as real
+	set the thedestinationpatch to patch of cue "MSCT"
+	set thedeviceID to deviceID of cue "MSCT"
+	set thecommandformat to the command format of cue "MSCT"
+	set thecommandnumber to the command number of cue "MSCT"
+	if thecommandnumber is less than 12 then
+		set thecommandname to item thecommandnumber of thecommandnamelist
+	else
+		display dialog "Sorry can't generate a list with that command"
+		return
+		
+	end if
+	set theqlist to the q_list of cue "MSCT"
+	set theqpath to the q_path of cue "MSCT"
+	repeat therepeat times
+		make type "MIDI"
+		set theselectedcue to last item of (selected as list)
+		set the q number of theselectedcue to ""
+		set the patch of theselectedcue to thedestinationpatch
+		set the message type of theselectedcue to msc
+		set the command format of theselectedcue to thecommandformat
+		set the command number of theselectedcue to thecommandnumber
+		set the deviceID of theselectedcue to thedeviceID
+		if theindex mod 1 is 0 and integertype is "1" then
+			set the q_number of theselectedcue to (theindex as integer) as string
+		else
+			set the q_number of theselectedcue to theindex as string
+		end if
+		set the q_list of theselectedcue to theqlist as string
+		set the q_path of theselectedcue to theqpath as string
+		set mynumber to (theindex as integer) as string
+		set the q name of theselectedcue to thedevicename & " MSC (ID" & thedeviceID & ") " & thecommandname & " " & the q_number of theselectedcue
+		
+		set theindex to theindex + theincrement
+	end repeat
+end tell
