@@ -1,0 +1,42 @@
+display dialog "Number of cues to generate:" default answer "100"
+if button returned of result = "cancel" then
+	return
+else
+	set therepeat to (text returned of result) as integer
+end if
+display dialog "Increment?" default answer "1"
+if button returned of result = "cancel" then
+	return
+else
+	set theincrement to (text returned of result) as real
+end if
+display dialog "Integer value format" buttons {"1", "1.0"} default button "1"
+set integertype to button returned of result
+display dialog "Device Name for Q Name Text:" default answer ""
+if button returned of result = "cancel" then
+	return
+else
+	set thedevicename to (text returned of result) as string
+end if
+tell application id "com.figure53.qlab.3" to tell front workspace
+	if the osc message type of cue "QSCT" is not qlab then
+		display dialog "This generator only makes lists from QLab OSC messages"
+		return
+	end if
+	set theindex to q_num of cue "QSCT" as real
+	set the thedestinationpatch to patch of cue "QSCT"
+	repeat therepeat times
+		make type "OSC"
+		set theselectedcue to last item of (selected as list)
+		if theindex mod 1 is 0 and integertype is "1" then
+			set the q_num of theselectedcue to (theindex as integer) as string
+		else
+			set the q_num of theselectedcue to theindex as string
+		end if
+		set the q number of theselectedcue to ""
+		set the patch of theselectedcue to thedestinationpatch
+		set the osc message type of theselectedcue to qlab
+		set the q name of theselectedcue to thedevicename & " QOSC " & q default name of theselectedcue
+		set theindex to theindex + theincrement
+	end repeat
+end tell
