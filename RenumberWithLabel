@@ -1,0 +1,26 @@
+tell application "QLab3"
+	display dialog "Label for Qs" default answer ""
+	if button returned of result = "cancel" then
+		return
+	else
+		set label to (text returned of result) as string
+	end if
+	display dialog "Start number" default answer "1"
+	if button returned of result = "cancel" then
+		return
+	else
+		set startn to (text returned of result) as integer
+	end if
+	display dialog "Increment by:" default answer "1"
+	if button returned of result = "cancel" then
+		return
+	else
+		set inc to (text returned of result) as integer
+	end if
+	set allCues to selected of workspace 1
+	set qNumber to startn
+	repeat with myCue in allCues
+		set q number of myCue to label & qNumber
+		set qNumber to qNumber + inc
+	end repeat
+end tell
